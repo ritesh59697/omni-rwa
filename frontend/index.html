@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OmniRWA | Institutional RWA Restaking & Autonomous AI Yield Engine</title>
+  <meta name="description" content="Institutional-grade automated yield aggregator and restaking protocol for tokenized Real World Assets on BOT Chain powered by Autonomous AI Agents.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <!-- Ethers.js v6 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="brand" id="nav-brand" role="button" tabindex="0">
+        <div class="brand-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <span class="brand-title">OmniRWA</span>
+        <span class="brand-badge">BOT Chain 677</span>
+      </div>
+
+      <div class="nav-links">
+        <button class="nav-link active" data-tab="tab-landing" id="nav-landing">
+          Overview
+        </button>
+        <button class="nav-link" data-tab="tab-vault" id="nav-vault">
+          OmniVault
+        </button>
+        <button class="nav-link" data-tab="tab-restake" id="nav-restake">
+          Restaking
+        </button>
+        <button class="nav-link" data-tab="tab-ai-agent" id="nav-ai-agent">
+          AI Agent <span class="live-indicator"></span>
+        </button>
+        <button class="nav-link" data-tab="tab-attestation" id="nav-attestation">
+          Proof of Reserve
+        </button>
+      </div>
+
+      <div class="nav-actions">
+        <div class="network-tag">
+          <span class="live-indicator"></span>
+          <span id="network-name">BOT Mainnet</span>
+        </div>
+        <button class="btn btn-faucet btn-sm" id="btn-faucet-quick" title="Claim 10,000 test USDT">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Claim Faucet
+        </button>
+        <button class="btn btn-wallet btn-sm" id="btn-connect-wallet">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
+          <span id="wallet-btn-text">Connect Wallet</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main View Area -->
+  <main class="main-content">
+
+    <!-- ========================================================= -->
+    <!-- TAB 0: INSTITUTIONAL LANDING OVERVIEW -->
+    <!-- ========================================================= -->
+    <section class="tab-pane active" id="tab-landing">
+      <!-- Asymmetric Hero Grid -->
+      <div class="hero-asymmetric-grid">
+        <!-- Left: Statement & Direct Actions -->
+        <div class="hero-statement">
+          <div class="pill-status">
+            <span class="live-indicator"></span>
+            BOT Chain Builder Challenge #2 • AI × RWA Track
+          </div>
+
+          <h1 class="hero-h1">
+            Institutional Real-World Assets.<br>
+            <strong>Autonomous AI Yield Engine.</strong>
+          </h1>
+
+          <p class="hero-p">
+            OmniRWA aggregates tokenized sovereign debt, commercial real estate loans, and green infrastructure into an ERC-4626 vault dynamically rebalanced by on-chain AI agents on BOT Chain.
+          </p>
+
+          <div class="hero-actions-row">
+            <button class="btn btn-primary btn-lg" onclick="switchAppTab('tab-vault')">
+              Launch OmniVault App
+            </button>
+            <button class="btn btn-secondary btn-lg" onclick="switchAppTab('tab-ai-agent')">
+              View AI Agent Telemetry ↗
+            </button>
+            <a href="#calculator-section" class="btn btn-outline btn-lg">
+              Calculate Yields
+            </a>
+          </div>
+
+          <div class="quick-stats-row">
+            <div class="quick-stat-item">
+              <div class="stat-label">Total Value Locked</div>
+              <div class="stat-num" id="landing-tvl">$1,485,200 <span style="font-size:0.8rem;color:var(--text-tertiary);">USDT</span></div>
+              <div class="stat-sub">100% Asset-Backed</div>
+            </div>
+            <div class="quick-stat-item">
+              <div class="stat-label">Blended Optimized APY</div>
+              <div class="stat-num" id="landing-apy" style="color:var(--accent-text);">7.49%</div>
+              <div class="stat-sub">AI Dynamic Rebalancing</div>
+            </div>
+            <div class="quick-stat-item">
+              <div class="stat-label">AI Risk Composite</div>
+              <div class="stat-num">32 <span style="font-size:0.8rem;color:var(--text-tertiary);">/100</span></div>
+              <div class="stat-sub">Grade AAA Sovereign</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Real-Time Live Market Matrix -->
+        <div class="market-matrix-card">
+          <div class="matrix-header">
+            <div class="matrix-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              Active RWA Strategies (ERC-4626)
+            </div>
+            <span class="matrix-status-tag">Live Allocation</span>
+          </div>
+
+          <table class="matrix-table">
+            <thead>
+              <tr>
+                <th>Asset</th>
+                <th>Category</th>
+                <th>Base Yield</th>
+                <th>Allocation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="token-cell">
+                    <span class="token-symbol">bUSTB</span>
+                    <span class="token-desc">US Treasury 3M</span>
+                  </div>
+                </td>
+                <td><span style="font-size:0.75rem;color:var(--text-secondary);">Sovereign Debt</span></td>
+                <td><span class="yield-badge">5.20% APY</span></td>
+                <td>
+                  <div class="allocation-bar-wrap">
+                    <div class="alloc-fill" id="matrix-bar-bustb" style="width: 50%;"></div>
+                  </div>
+                  <span class="mono-data" style="font-size:0.72rem;color:var(--text-tertiary);" id="matrix-weight-bustb">50.0%</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="token-cell">
+                    <span class="token-symbol">bREIT</span>
+                    <span class="token-desc">Commercial Debt</span>
+                  </div>
+                </td>
+                <td><span style="font-size:0.75rem;color:var(--text-secondary);">First-Lien Mortgage</span></td>
+                <td><span class="yield-badge">8.70% APY</span></td>
+                <td>
+                  <div class="allocation-bar-wrap">
+                    <div class="alloc-fill purple" id="matrix-bar-breit" style="width: 30%;"></div>
+                  </div>
+                  <span class="mono-data" style="font-size:0.72rem;color:var(--text-tertiary);" id="matrix-weight-breit">30.0%</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="token-cell">
+                    <span class="token-symbol">bGREEN</span>
+                    <span class="token-desc">Solar & Wind</span>
+                  </div>
+                </td>
+                <td><span style="font-size:0.75rem;color:var(--text-secondary);">Clean Infrastructure</span></td>
+                <td><span class="yield-badge">11.40% APY</span></td>
+                <td>
+                  <div class="allocation-bar-wrap">
+                    <div class="alloc-fill green" id="matrix-bar-bgreen" style="width: 20%;"></div>
+                  </div>
+                  <span class="mono-data" style="font-size:0.72rem;color:var(--text-tertiary);" id="matrix-weight-bgreen">20.0%</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="matrix-footer">
+            <span>Autonomous Blended Portfolio APY</span>
+            <strong id="matrix-blended-apy">7.49% APY</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Architecture Pipeline -->
+      <div class="section-block">
+        <div class="section-head">
+          <div class="section-title-wrap">
+            <h2>End-to-End Protocol Flow</h2>
+            <p>A deterministic on-chain execution pipeline connecting standard ERC-4626 vault shares with off-chain AI decision proofs.</p>
+          </div>
+        </div>
+
+        <div class="architecture-row">
+          <div class="arch-step-card">
+            <div class="step-num">STEP 01</div>
+            <div class="step-title">Deposit Stablecoins</div>
+            <div class="step-desc">Deposit USDT into the ERC-4626 OmniVault. Mint auto-compounding <code>omniRWA</code> receipt shares with instant liquidity.</div>
+            <div class="step-meta">ERC-4626 Standard</div>
+          </div>
+
+          <div class="arch-step-card" style="border-color: var(--border-focus);">
+            <div class="step-num" style="color:var(--blue);">STEP 02</div>
+            <div class="step-title">Autonomous AI Optimization</div>
+            <div class="step-desc">Gemini 3.7 Flash AI agents evaluate macroeconomic rates, yield curves, and credit default spreads to calculate optimal portfolio weights.</div>
+            <div class="step-meta">Verifiable Decision Hash</div>
+          </div>
+
+          <div class="arch-step-card">
+            <div class="step-num">STEP 03</div>
+            <div class="step-title">Tokenized RWA Allocation</div>
+            <div class="step-desc">Capital is routed across tokenized real-world assets: US Treasuries (<code>bUSTB</code>), Commercial Real Estate (<code>bREIT</code>), and Clean Energy (<code>bGREEN</code>).</div>
+            <div class="step-meta">100% Asset-Backed</div>
+          </div>
+
+          <div class="arch-step-card">
+            <div class="step-num">STEP 04</div>
+            <div class="step-title">Restaking & Multipliers</div>
+            <div class="step-desc">Restake vault shares to provide collateral security. Unlock up to 2.0x yield multipliers and accrue native BOT ecosystem reward points.</div>
+            <div class="step-meta">Up to 2.0x Multiplier</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Curated Real-World Assets -->
+      <div class="section-block">
+        <div class="section-head">
+          <div class="section-title-wrap">
+            <h2>Tokenized Real-World Asset Basket</h2>
+            <p>Institutional sovereign and credit obligations tokenized natively for transparent settlement on BOT Chain.</p>
+          </div>
+        </div>
+
+        <div class="assets-trio-grid">
+          <div class="asset-tier-box">
+            <div class="tier-top">
+              <span class="tier-code">bUSTB</span>
+              <span class="tier-badge">AAA Sovereign</span>
+            </div>
+            <div class="tier-name">US Treasury 3M Bills</div>
+            <div class="tier-metrics-list">
+              <div class="tier-metric-item">
+                <span>Base Yield</span>
+                <strong style="color:var(--green);">5.20% APY</strong>
+              </div>
+              <div class="tier-metric-item">
+                <span>Liquidity</span>
+                <strong>Daily / Instant</strong>
+              </div>
+            </div>
+            <p class="tier-desc-p">Tokenized short-term United States Treasury obligations held in bankruptcy-remote institutional custodial trust accounts.</p>
+            <div class="tier-foot">
+              <span>Custodian: Apex Trust</span>
+              <button class="tier-link-btn" onclick="switchAppTab('tab-attestation')">View Attestation ↗</button>
+            </div>
+          </div>
+
+          <div class="asset-tier-box">
+            <div class="tier-top">
+              <span class="tier-code">bREIT</span>
+              <span class="tier-badge">Grade A+ Debt</span>
+            </div>
+            <div class="tier-name">Commercial Real Estate Debt</div>
+            <div class="tier-metrics-list">
+              <div class="tier-metric-item">
+                <span>Base Yield</span>
+                <strong style="color:var(--green);">8.70% APY</strong>
+              </div>
+              <div class="tier-metric-item">
+                <span>LTV Ratio</span>
+                <strong>62.5% Max</strong>
+              </div>
+            </div>
+            <p class="tier-desc-p">First-lien senior mortgage debt on logistics centers and medical facilities with independent NAV appraisals.</p>
+            <div class="tier-foot">
+              <span>Auditor: C&W Valuation</span>
+              <button class="tier-link-btn" onclick="switchAppTab('tab-attestation')">View Attestation ↗</button>
+            </div>
+          </div>
+
+          <div class="asset-tier-box">
+            <div class="tier-top">
+              <span class="tier-code">bGREEN</span>
+              <span class="tier-badge">BBB+ Clean Yield</span>
+            </div>
+            <div class="tier-name">Solar & Wind Infrastructure</div>
+            <div class="tier-metrics-list">
+              <div class="tier-metric-item">
+                <span>Base Yield</span>
+                <strong style="color:var(--green);">11.40% APY</strong>
+              </div>
+              <div class="tier-metric-item">
+                <span>Offtake</span>
+                <strong>15-Yr PPA</strong>
+              </div>
+            </div>
+            <p class="tier-desc-p">Yield-bearing bonds funding utility-scale photovoltaic solar parks backed by long-term Power Purchase Agreements.</p>
+            <div class="tier-foot">
+              <span>Verification: Verra Standard</span>
+              <button class="tier-link-btn" onclick="switchAppTab('tab-attestation')">View Attestation ↗</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Yield Calculator -->
+      <div class="section-block" id="calculator-section">
+        <div class="section-head">
+          <div class="section-title-wrap">
+            <h2>Yield & Returns Simulator</h2>
+            <p>Simulate projected returns across different deposit sizes, time horizons, and restaking multiplier tiers.</p>
+          </div>
+        </div>
+
+        <div class="calculator-panel">
+          <div class="calc-split-grid">
+            <div class="calc-input-col">
+              <div class="field-group">
+                <label>
+                  <span>Deposit Capital (USDT)</span>
+                  <span class="val-display" id="calc-principal-text">$10,000</span>
+                </label>
+                <input type="range" class="slider-input" id="calc-principal-slider" min="500" max="100000" step="500" value="10000">
+                <div class="slider-scale-labels">
+                  <span>$500</span>
+                  <span>$25,000</span>
+                  <span>$50,000</span>
+                  <span>$100,000</span>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label>Time Horizon</label>
+                <div class="time-pill-group">
+                  <button class="calc-pill" data-months="1">1 Month</button>
+                  <button class="calc-pill" data-months="6">6 Months</button>
+                  <button class="calc-pill active" data-months="12">1 Year</button>
+                  <button class="calc-pill" data-months="36">3 Years</button>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label>Restaking Multiplier Tier</label>
+                <select class="select-box" id="calc-tier-select">
+                  <option value="1.0">Flexible Restake (1.0x Boost)</option>
+                  <option value="1.25">30-Day Lock (+25% Boost)</option>
+                  <option value="1.50">90-Day Lock (+50% Boost)</option>
+                  <option value="2.0">180-Day Lock (2.0x Max Boost)</option>
+                </select>
+              </div>
+
+              <button class="btn btn-primary btn-lg" style="width:100%;margin-top:0.5rem;" onclick="switchAppTab('tab-vault')">
+                Deposit in OmniVault Now ↗
+              </button>
+            </div>
+
+            <div class="calc-output-col">
+              <div class="primary-result-box">
+                <div class="result-tag" id="calc-omni-apy">OmniRWA AI Strategy • 7.49% APY</div>
+                <div class="result-total-num" id="calc-omni-total">$10,749.00</div>
+                <div class="result-profit-line" id="calc-omni-profit">+$749.00 Total Profit</div>
+                <div class="result-reward-pts" id="calc-omni-points">1,498 BOT Reward Points accrued</div>
+              </div>
+
+              <div class="comparison-duo">
+                <div class="comp-box">
+                  <div class="comp-label">TradFi Bank Savings (0.50% APY)</div>
+                  <div class="comp-num" id="calc-tradfi-total">$10,050.00</div>
+                  <div class="comp-profit" id="calc-tradfi-profit">+$50.00 Profit</div>
+                </div>
+
+                <div class="comp-box">
+                  <div class="comp-label">Standard Stable Pool (3.20% APY)</div>
+                  <div class="comp-num" id="calc-defi-total">$10,320.00</div>
+                  <div class="comp-profit" id="calc-defi-profit">+$320.00 Profit</div>
+                </div>
+              </div>
+
+              <div style="font-size:0.8rem;color:var(--text-secondary);padding:0.65rem 0.85rem;background:var(--bg-app);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);">
+                OmniRWA outperforms traditional bank savings by <strong style="color:var(--accent-text);" id="calc-outperform-multiplier">14.9x</strong> in net yield.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Safety Guardrails -->
+      <div class="section-block">
+        <div class="section-head">
+          <div class="section-title-wrap">
+            <h2>Safety Parameters & Guardrails</h2>
+            <p>Smart contract parameters enforcing portfolio safety and principal preservation.</p>
+          </div>
+        </div>
+
+        <div class="guardrails-row">
+          <div class="guardrail-item">
+            <h4>Hardcoded Safety Minimum</h4>
+            <p>Mandatory minimum &ge; 20% allocation in Sovereign US Treasuries (<code>bUSTB</code>) at all times to prevent severe downside.</p>
+          </div>
+          <div class="guardrail-item">
+            <h4>Single-Asset Concentration Cap</h4>
+            <p>No non-sovereign strategy can exceed 60% of vault assets regardless of market demand.</p>
+          </div>
+          <div class="guardrail-item">
+            <h4>Macroeconomic Oracle Feeds</h4>
+            <p>Gemini 3.7 Flash risk engines evaluate interest rates, inflation, and delinquency data.</p>
+          </div>
+          <div class="guardrail-item">
+            <h4>Cryptographic Proof Logging</h4>
+            <p>Every rebalancing trade records an immutable AI rationale and IPFS proof hash on BOT Chain.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: FAQ -->
+      <div class="section-block">
+        <div class="section-head">
+          <div class="section-title-wrap">
+            <h2>Frequently Asked Questions</h2>
+            <p>Key information regarding tokenized real-world assets, AI rebalancing, and restaking.</p>
+          </div>
+        </div>
+
+        <div class="faq-list">
+          <div class="faq-card">
+            <button class="faq-trigger">
+              <span>What are Tokenized Real-World Assets (RWAs)?</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-body">
+              <p>Tokenized RWAs represent real financial contracts—such as US Treasuries, commercial real estate loans, and green energy infrastructure—brought on-chain as ERC-20 tokens. OmniRWA pools these yield-bearing assets into an ERC-4626 vault so users can deposit standard stablecoins (USDT) and earn genuine real-world yield.</p>
+            </div>
+          </div>
+
+          <div class="faq-card">
+            <button class="faq-trigger">
+              <span>How does the Autonomous AI Strategy Agent operate?</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-body">
+              <p>The AI Strategy Agent (powered by Gemini 3.7 Flash) analyzes off-chain macroeconomic indicators, interest rates, and counterparty risks. When market conditions shift, the AI computes optimal portfolio weights and dispatches verifiable on-chain rebalancing transactions through the <code>AiStrategyController</code> contract on BOT Chain.</p>
+            </div>
+          </div>
+
+          <div class="faq-card">
+            <button class="faq-trigger">
+              <span>How does Restaking work and what are BOT Points?</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-body">
+              <p>When you deposit stablecoins into OmniVault, you receive <code>omniRWA</code> vault shares. You can restake these shares into our restaking contract across 4 lock tiers (Flexible to 180 Days) to lock collateral and earn up to a 2.0x points multiplier + native BOT reward points.</p>
+            </div>
+          </div>
+
+          <div class="faq-card">
+            <button class="faq-trigger">
+              <span>How are reserves and collateral verified?</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-body">
+              <p>All underlying collateral assets are verified via cryptographic IPFS custody attestations. Each RWA strategy contract (<code>bUSTB</code>, <code>bREIT</code>, <code>bGREEN</code>) links directly to institutional custodians, legal title documents, and Net Asset Value (NAV) audit reports on the BOT Chain explorer.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- TAB 1: OMNIVAULT -->
+    <!-- ========================================================= -->
+    <section class="tab-pane" id="tab-vault">
+      <div class="dapp-header-row">
+        <div>
+          <h2>ERC-4626 OmniVault</h2>
+          <p>Deposit stablecoins to mint auto-compounding <code>omniRWA</code> vault shares with dynamic AI portfolio rebalancing.</p>
+        </div>
+      </div>
+
+      <div class="stats-4-grid">
+        <div class="stat-metric-card">
+          <div class="label">Total Value Locked</div>
+          <div class="value" id="stat-tvl">$1,485,200 <span style="font-size:0.75rem;color:var(--text-tertiary);">USDT</span></div>
+          <div class="subtext">+14.2% this week</div>
+        </div>
+        <div class="stat-metric-card">
+          <div class="label">Blended RWA APY</div>
+          <div class="value" id="stat-apy" style="color:var(--accent-text);">7.49%</div>
+          <div class="subtext">AI Optimized</div>
+        </div>
+        <div class="stat-metric-card">
+          <div class="label">AI Risk Score</div>
+          <div class="value" id="stat-risk">32 <span style="font-size:0.75rem;color:var(--text-tertiary);">/100</span></div>
+          <div class="subtext">Low Risk • Grade AAA</div>
+        </div>
+        <div class="stat-metric-card">
+          <div class="label">Total Yield Generated</div>
+          <div class="value" id="stat-yield">$98,420 <span style="font-size:0.75rem;color:var(--text-tertiary);">USDT</span></div>
+          <div class="subtext">100% Real-World Backed</div>
+        </div>
+      </div>
+
+      <div class="dapp-2col-grid">
+        <!-- Deposit / Withdraw Action Panel -->
+        <div class="dapp-panel">
+          <div class="dapp-panel-header">
+            <h3>Vault Interaction</h3>
+            <span style="font-size:0.75rem;font-family:var(--font-mono);color:var(--text-secondary);">1 omniRWA = <strong>1.000 USDT</strong></span>
+          </div>
+
+          <div class="dapp-panel-body">
+            <div class="switch-tab-bar">
+              <button class="switch-tab-btn active" id="vault-mode-deposit">Deposit</button>
+              <button class="switch-tab-btn" id="vault-mode-withdraw">Withdraw</button>
+            </div>
+
+            <!-- Deposit Form -->
+            <div class="vault-subform active" id="form-deposit">
+              <div class="input-block">
+                <div class="input-header-line">
+                  <span>Deposit Asset</span>
+                  <span>Balance: <strong id="user-usdt-balance">10,000.00</strong> USDT</span>
+                </div>
+                <div class="input-wrapper-box">
+                  <span class="token-pill-badge">USDT</span>
+                  <input type="number" id="deposit-amount" placeholder="0.00" min="0" step="any">
+                  <button class="btn-max-pill" id="btn-max-deposit">MAX</button>
+                </div>
+              </div>
+
+              <div class="conversion-summary-table">
+                <div class="conv-row">
+                  <span>You will receive:</span>
+                  <strong id="preview-shares">0.00 omniRWA</strong>
+                </div>
+                <div class="conv-row">
+                  <span>Expected Annual Yield:</span>
+                  <strong style="color:var(--green);" id="preview-annual-yield">+$0.00 / year</strong>
+                </div>
+                <div class="conv-row">
+                  <span>Management Fee:</span>
+                  <strong>0.50%</strong>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:0.5rem;">
+                <button class="btn btn-primary btn-lg" id="btn-deposit-action" style="width:100%;">
+                  <span id="deposit-btn-text">Deposit & Mint omniRWA</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" id="btn-claim-faucet-inline">
+                  Claim 10,000 Test USDT (Faucet)
+                </button>
+              </div>
+            </div>
+
+            <!-- Withdraw Form -->
+            <div class="vault-subform" id="form-withdraw">
+              <div class="input-block">
+                <div class="input-header-line">
+                  <span>Redeem Shares</span>
+                  <span>Available: <strong id="user-shares-balance">2,500.00</strong> omniRWA</span>
+                </div>
+                <div class="input-wrapper-box">
+                  <span class="token-pill-badge">omniRWA</span>
+                  <input type="number" id="withdraw-amount" placeholder="0.00" min="0" step="any">
+                  <button class="btn-max-pill" id="btn-max-withdraw">MAX</button>
+                </div>
+              </div>
+
+              <div class="conversion-summary-table">
+                <div class="conv-row">
+                  <span>You will receive:</span>
+                  <strong id="preview-withdraw-usdt">0.00 USDT</strong>
+                </div>
+                <div class="conv-row">
+                  <span>Redemption Fee:</span>
+                  <strong style="color:var(--green);">0.00% (Instant)</strong>
+                </div>
+              </div>
+
+              <button class="btn btn-primary btn-lg" id="btn-withdraw-action" style="width:100%;">
+                <span id="withdraw-btn-text">Withdraw USDT</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Strategy Allocation Breakdown -->
+        <div class="dapp-panel">
+          <div class="dapp-panel-header">
+            <h3>Active Strategy Allocation</h3>
+            <span class="matrix-status-tag">Live On-Chain</span>
+          </div>
+
+          <div class="dapp-panel-body">
+            <div class="strategy-row-item">
+              <div class="strat-info">
+                <div class="strat-top">
+                  <span>bUSTB • US Treasury 3M Bills</span>
+                  <span class="mono-data" id="weight-bustb">50.0%</span>
+                </div>
+                <div class="strat-progress">
+                  <div class="strat-fill b1" id="bar-bustb" style="width:50%;"></div>
+                </div>
+                <div class="strat-bottom">
+                  <span>Base Yield: <strong>5.20% APY</strong></span>
+                  <span>Risk: Ultra-Low (AAA)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="strategy-row-item">
+              <div class="strat-info">
+                <div class="strat-top">
+                  <span>bREIT • Commercial Real Estate Debt</span>
+                  <span class="mono-data" id="weight-breit">30.0%</span>
+                </div>
+                <div class="strat-progress">
+                  <div class="strat-fill b2" id="bar-breit" style="width:30%;"></div>
+                </div>
+                <div class="strat-bottom">
+                  <span>Base Yield: <strong>8.70% APY</strong></span>
+                  <span>Risk: Moderate (A+)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="strategy-row-item">
+              <div class="strat-info">
+                <div class="strat-top">
+                  <span>bGREEN • Solar & Wind Infrastructure</span>
+                  <span class="mono-data" id="weight-bgreen">20.0%</span>
+                </div>
+                <div class="strat-progress">
+                  <div class="strat-fill b3" id="bar-bgreen" style="width:20%;"></div>
+                </div>
+                <div class="strat-bottom">
+                  <span>Base Yield: <strong>11.40% APY</strong></span>
+                  <span>Risk: Higher Yield (BBB+)</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:0.85rem;color:var(--text-secondary);">Blended Portfolio APY</span>
+              <span class="mono-data" style="font-size:1.3rem;font-weight:800;color:var(--accent-text);" id="summary-blended-apy">7.49% APY</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- TAB 2: RESTAKING -->
+    <!-- ========================================================= -->
+    <section class="tab-pane" id="tab-restake">
+      <div class="dapp-header-row">
+        <div>
+          <h2>RWA Restaking & Ecosystem Multipliers</h2>
+          <p>Lock your <code>omniRWA</code> vault shares to provide economic security for tokenized asset custody and unlock yield multipliers.</p>
+        </div>
+      </div>
+
+      <div class="dapp-2col-grid">
+        <div class="dapp-panel">
+          <div class="dapp-panel-header">
+            <h3>Restake omniRWA</h3>
+            <span style="font-size:0.75rem;font-family:var(--font-mono);color:var(--purple);">Up to 2.0x Boost</span>
+          </div>
+
+          <div class="dapp-panel-body">
+            <div class="input-block">
+              <div class="input-header-line">
+                <span>Restake Amount</span>
+                <span>Available: <strong id="restake-shares-avail">2,500.00</strong> omniRWA</span>
+              </div>
+              <div class="input-wrapper-box">
+                <span class="token-pill-badge">omniRWA</span>
+                <input type="number" id="restake-amount" placeholder="0.00" min="0">
+                <button class="btn-max-pill" id="btn-max-restake">MAX</button>
+              </div>
+            </div>
+
+            <label style="display:block;font-size:0.75rem;font-weight:700;text-transform:uppercase;color:var(--text-secondary);margin-bottom:0.5rem;">Select Lock Duration Tier</label>
+            <div class="restake-tiers-grid">
+              <div class="tier-select-pill active" data-tier="0">
+                <div class="t-name">Flexible</div>
+                <div class="t-mult">1.0x</div>
+                <div class="t-boost">No Lock</div>
+              </div>
+              <div class="tier-select-pill" data-tier="1">
+                <div class="t-name">30 Days</div>
+                <div class="t-mult">1.25x</div>
+                <div class="t-boost">+25% Boost</div>
+              </div>
+              <div class="tier-select-pill" data-tier="2">
+                <div class="t-name">90 Days</div>
+                <div class="t-mult">1.50x</div>
+                <div class="t-boost">+50% Boost</div>
+              </div>
+              <div class="tier-select-pill" data-tier="3">
+                <div class="t-name">180 Days</div>
+                <div class="t-mult">2.00x</div>
+                <div class="t-boost">2x Max</div>
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-lg" id="btn-restake-action" style="width:100%;">
+              <span id="restake-btn-text">Restake Shares</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="dapp-panel">
+          <div class="dapp-panel-header">
+            <h3>My Restaked Positions</h3>
+            <span style="font-size:0.75rem;font-family:var(--font-mono);color:var(--text-secondary);" id="positions-count">0 Active</span>
+          </div>
+
+          <div class="dapp-panel-body">
+            <div id="positions-container">
+              <div style="text-align:center;padding:3rem 1rem;color:var(--text-tertiary);font-size:0.88rem;">
+                No active restake positions. Restake shares to earn multipliers and BOT Points.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- TAB 3: AI STRATEGY AGENT -->
+    <!-- ========================================================= -->
+    <section class="tab-pane" id="tab-ai-agent">
+      <div class="dapp-header-row">
+        <div>
+          <h2>Autonomous AI Strategy Controller</h2>
+          <p>Live simulation and verifiable execution of portfolio rebalancing powered by Gemini 3.7 Flash.</p>
+        </div>
+      </div>
+
+      <div class="dapp-2col-grid">
+        <div class="dapp-panel">
+          <div class="dapp-panel-header">
+            <h3>AI Scenario Dispatcher</h3>
+            <span class="matrix-status-tag">Model: Gemini 3.7 Flash</span>
+          </div>
+
+          <div class="dapp-panel-body">
+            <div class="scenario-selector-list">
+              <button class="scenario-card-btn active" data-scenario="balanced" id="scenario-balanced">
+                <div class="scen-title">Balanced Alpha</div>
+                <div class="scen-weights">50% Treasuries • 30% Real Estate • 20% Green</div>
+                <div class="scen-target">Target: 7.49% APY • Optimal Sharpe</div>
+              </button>
+
+              <button class="scenario-card-btn" data-scenario="defensive" id="scenario-defensive">
+                <div class="scen-title">Flight to Quality (Defensive)</div>
+                <div class="scen-weights">70% Treasuries • 20% Real Estate • 10% Green</div>
+                <div class="scen-target">Target: 6.52% APY • Minimal Risk</div>
+              </button>
+
+              <button class="scenario-card-btn" data-scenario="high-yield" id="scenario-high-yield">
+                <div class="scen-title">High-Yield Expansion</div>
+                <div class="scen-weights">25% Treasuries • 45% Real Estate • 30% Green</div>
+                <div class="scen-target">Target: 8.63% APY • Max Yield</div>
+              </button>
+            </div>
+
+            <div style="background:var(--bg-app);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:1rem;margin-bottom:1.25rem;">
+              <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-tertiary);margin-bottom:0.4rem;">
+                <span>AI RATIONALE</span>
+                <span style="color:var(--green);">99.4% CONFIDENCE</span>
+              </div>
+              <p style="font-size:0.85rem;color:var(--text-primary);font-style:italic;" id="ai-rationale-display">
+                "Base macroeconomic environment: Moderate inflation with stable Treasury yields. Optimal risk-adjusted Sharpe ratio achieved via 50% bUSTB, 30% bREIT, and 20% bGREEN."
+              </p>
+              <div style="font-size:0.72rem;color:var(--text-tertiary);border-top:1px solid var(--border-subtle);padding-top:0.5rem;margin-top:0.5rem;">
+                Guardrail Status: <strong style="color:var(--green);">PASSED</strong> (Treasury &ge; 20%, Risk Score &le; 80)
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-lg" id="btn-trigger-ai-rebalance" style="width:100%;">
+              <span id="rebalance-btn-text">Execute Autonomous AI Rebalance</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="dapp-panel">
+          <div class="dapp-panel-header">
+            <h3>Verifiable AI Decision Log</h3>
+            <span class="matrix-status-tag" id="decision-count-badge">Live RPC Stream</span>
+          </div>
+
+          <div class="dapp-panel-body" style="padding:0;">
+            <div class="terminal-block" style="border:none;border-radius:0;">
+              <div class="terminal-top-bar">
+                <span>ai-strategy-agent@botchain-mainnet:~</span>
+              </div>
+              <div class="terminal-stream" id="ai-terminal-logs">
+                <div class="stream-line dim">[SYSTEM] Connected to BOT Chain RPC: https://rpc.botchain.ai</div>
+                <div class="stream-line dim">[AGENT] Initializing OmniRWA Risk Telemetry Monitor...</div>
+                <div class="stream-line green">[ORACLE] Ingesting Fed Funds Rate: 5.25% | US 3M T-Bill: 5.20%</div>
+                <div class="stream-line green">[ORACLE] Commercial Real Estate Index Default Rate: 0.82% (Low)</div>
+                <div class="stream-line accent">[AI-ENGINE] Calculated Optimal Weighted APY: 7.49%</div>
+                <div class="stream-line accent">[STATUS] Vault in equilibrium. Ready for automated rebalance signal.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- TAB 4: PROOF OF RESERVE -->
+    <!-- ========================================================= -->
+    <section class="tab-pane" id="tab-attestation">
+      <div class="dapp-header-row">
+        <div>
+          <h2>Proof of Reserve & Attestation Registry</h2>
+          <p>Transparent on-chain verification of all custodial accounts, legal title documents, and smart contracts deployed on BOT Chain.</p>
+        </div>
+      </div>
+
+      <div class="dapp-panel">
+        <div class="dapp-panel-header">
+          <h3>Collateral Attestation Directory</h3>
+          <span class="matrix-status-tag">100% Backed</span>
+        </div>
+
+        <div class="dapp-panel-body" style="padding:0;">
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Asset</th>
+                  <th>Category</th>
+                  <th>Base APY</th>
+                  <th>NAV Price</th>
+                  <th>Attestation Hash (IPFS)</th>
+                  <th>Contract Address</th>
+                  <th>Explorer</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>bUSTB</strong><br><small style="color:var(--text-tertiary);">US Treasury 3M</small></td>
+                  <td><span style="font-size:0.75rem;color:var(--blue);">US Sovereign Debt</span></td>
+                  <td><strong style="color:var(--green);font-family:var(--font-mono);">5.20%</strong></td>
+                  <td class="font-mono">$1.000 USDT</td>
+                  <td><code>QmTreasuryAttestation2026...</code></td>
+                  <td><span class="font-mono" style="font-size:0.75rem;color:var(--accent-text);" id="addr-bustb">0xdc1628...EFCA</span></td>
+                  <td><a href="https://scan.bohr.life/address/0xdc162849bD2c2B0dfF9e47ABf3Cd00734117EFCA" target="_blank" class="link-action">BOTScan ↗</a></td>
+                </tr>
+                <tr>
+                  <td><strong>bREIT</strong><br><small style="color:var(--text-tertiary);">Commercial Real Estate</small></td>
+                  <td><span style="font-size:0.75rem;color:var(--purple);">Real Estate Debt</span></td>
+                  <td><strong style="color:var(--green);font-family:var(--font-mono);">8.70%</strong></td>
+                  <td class="font-mono">$1.000 USDT</td>
+                  <td><code>QmRealEstateAttestation2026...</code></td>
+                  <td><span class="font-mono" style="font-size:0.75rem;color:var(--accent-text);" id="addr-breit">0xeF9192...Dd12</span></td>
+                  <td><a href="https://scan.bohr.life/address/0xeF919280728e2f78fe04F5813134616Fa276Dd12" target="_blank" class="link-action">BOTScan ↗</a></td>
+                </tr>
+                <tr>
+                  <td><strong>bGREEN</strong><br><small style="color:var(--text-tertiary);">Green Infrastructure</small></td>
+                  <td><span style="font-size:0.75rem;color:var(--green);">Clean Energy Bonds</span></td>
+                  <td><strong style="color:var(--green);font-family:var(--font-mono);">11.40%</strong></td>
+                  <td class="font-mono">$1.000 USDT</td>
+                  <td><code>QmGreenBondAttestation2026...</code></td>
+                  <td><span class="font-mono" style="font-size:0.75rem;color:var(--accent-text);" id="addr-bgreen">0x198e48...8967</span></td>
+                  <td><a href="https://scan.bohr.life/address/0x198e48AfAF7b7eb1e6CcFbb14458A83FFc618967" target="_blank" class="link-action">BOTScan ↗</a></td>
+                </tr>
+                <tr>
+                  <td><strong>OmniVault</strong><br><small style="color:var(--text-tertiary);">ERC-4626 Vault</small></td>
+                  <td><span style="font-size:0.75rem;color:var(--accent-text);">Yield-Bearing Vault</span></td>
+                  <td><strong style="color:var(--accent-text);font-family:var(--font-mono);" id="table-vault-apy">7.49%</strong></td>
+                  <td class="font-mono">Dynamic NAV</td>
+                  <td><code>Smart Vault Reserve</code></td>
+                  <td><span class="font-mono" style="font-size:0.75rem;color:var(--accent-text);" id="addr-vault">0x3DAcbF...92A5</span></td>
+                  <td><a href="https://scan.bohr.life/address/0x3DAcbF0F199e804EB6572C62a5fBFCA6C92992A5" target="_blank" class="link-action">BOTScan ↗</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>© 2026 OmniRWA Protocol • Deployed on BOT Chain (Chain ID 677 / 968)</div>
+      <div class="footer-links-row">
+        <a href="https://scan.botchain.ai" target="_blank">BOTScan</a>
+        <a href="https://faucet.botchain.ai/basic" target="_blank">Faucet</a>
+        <a href="https://dev-docs.botchain.ai" target="_blank">Dev Docs</a>
+        <a href="https://t.me/BotChain_official/61" target="_blank">Telegram Hub</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
