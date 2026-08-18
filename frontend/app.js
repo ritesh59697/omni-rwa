@@ -357,6 +357,7 @@ async function onWalletConnected() {
   if (btn) btn.textContent = truncateAddress(userAddress);
   updateBalancesUI();
   addTerminalLog(`[WALLET] Connected user address: ${userAddress}`, "text-green");
+  await fetchOnChainData();
 }
 
 function updateBalancesUI() {
@@ -588,15 +589,107 @@ function applyAiScenario(key) {
   addTerminalLog(`[AI-MODEL] Switched scenario to: ${scenario.name} (Target APY: ${scenario.apy}%)`, "text-accent");
 }
 
-// Handlers
-function handleClaimFaucetQuick() {
+// =========================================================
+// ON-CHAIN SMART CONTRACT INTEGRATIONS & HANDLERS
+// =========================================================
+
+async function fetchOnChainData() {
+  if (!provider || !deployedConfig || !deployedConfig.contracts) return;
+
+  try {
+    const vault = new ethers.Contract(deployedConfig.contracts.OmniRwaVault, VAULT_ABI, provider);
+    
+    // Fetch total TVL & APY from contract
+    try {
+      const tvlRaw = await vault.totalAssets();
+      state.tvl = Number(ethers.formatUnits(tvlRaw, 6));
+      const statTvl = document.getElementById("stat-tvl");
+      if (statTvl) statTvl.innerHTML = `$${state.tvl.toLocaleString()} <span class="stat-sub">USDT</span>`;
+      const landingTvl = document.getElementById("landing-tvl");
+      if (landingTvl) landingTvl.innerHTML = `$${state.tvl.toLocaleString()} <span class="metric-sub">USDT</span>`;
+
+      const apyBps = await vault.getWeightedApyBps();
+      state.blendedApy = Number(apyBps) / 100;
+      const statApy = document.getElementById("stat-apy");
+      if (statApy) statApy.textContent = `${state.blendedApy.toFixed(2)}%`;
+      const landingApy = document.getElementById("landing-apy");
+      if (landingApy) landingApy.textContent = `${state.blendedApy.toFixed(2)}%`;
+    } catch (e) {
+      console.log("TVL/APY fetch fallback:", e);
+    }
+
+    // Fetch user on-chain balances if connected
+    if (userAddress) {
+      const usdt = new ethers.Contract(deployedConfig.contracts.MockUSDT, ERC20_ABI, provider);
+      const usdtBal = await usdt.balanceOf(userAddress);
+      state.userUsdtBalance = Number(ethers.formatUnits(usdtBal, 6));
+
+      const sharesBal = await vault.balanceOf(userAddress);
+      state.userSharesBalance = Number(ethers.formatUnits(sharesBal, 6));
+
+      updateBalancesUI();
+
+      // Fetch Restaking positions from contract
+      try {
+        const restaking = new ethers.Contract(deployedConfig.contracts.RwaRestakingManager, RESTAKING_ABI, provider);
+        const positions = await restaking.getUserPositions(userAddress);
+        if (positions && positions.length > 0) {
+          const tierNames = ["Flexible", "30 Days", "90 Days", "180 Days"];
+          const multipliers = ["1.0x", "1.25x", "1.50x", "2.00x"];
+          state.userPositions = positions.map((p, idx) => ({
+            amount: Number(ethers.formatUnits(p.amount, 6)),
+            tier: Number(p.lockDuration),
+            tierName: tierNames[Number(p.lockDuration)] || "Flexible",
+            mult: `${(Number(p.rewardMultiplierBps) / 10000).toFixed(2)}x`,
+            date: new Date(Number(p.startTime) * 1000).toLocaleDateString(),
+            points: Number(p.pointsAccrued)
+          }));
+          renderPositions();
+        }
+      } catch (err) {
+        console.log("Restake fetch note:", err);
+      }
+    }
+  } catch (err) {
+    console.log("On-chain data sync error:", err);
+  }
+}
+
+// 1. Onchain Faucet Claim
+async function handleClaimFaucetQuick() {
+  if (signer && deployedConfig && deployedConfig.contracts && deployedConfig.contracts.MockUSDT) {
+    try {
+      showToast("Please confirm Faucet transaction in your wallet...", "info");
+      addTerminalLog("[FAUCET] Calling MockUSDT.faucet() on BOT Chain...", "text-accent");
+      
+      const usdt = new ethers.Contract(deployedConfig.contracts.MockUSDT, ERC20_ABI, signer);
+      const tx = await usdt.faucet();
+      
+      showToast(`Faucet transaction submitted: ${truncateAddress(tx.hash)}. Waiting for block confirmation...`, "info");
+      addTerminalLog(`[FAUCET] Tx submitted: ${tx.hash}. Awaiting confirmation...`, "text-dim");
+      
+      await tx.wait();
+      showToast("Successfully claimed 10,000 USDT on-chain!", "success");
+      addTerminalLog(`[FAUCET] Tx Confirmed! 10,000 USDT minted to ${truncateAddress(userAddress)}.`, "text-green");
+      await fetchOnChainData();
+      return;
+    } catch (err) {
+      console.error(err);
+      showToast(err.reason || err.message || "Faucet transaction rejected/failed", "error");
+      addTerminalLog(`[FAUCET] Transaction failed: ${err.message}`, "text-dim");
+      return;
+    }
+  }
+
+  // Fallback demo mode if wallet is not connected
   state.userUsdtBalance += 10000;
   updateBalancesUI();
-  showToast("Successfully claimed 10,000 USDT test funds!", "success");
-  addTerminalLog(`[FAUCET] Ingested 10,000 USDT test tokens into balance. Tx: 0x${generateRandomHash().slice(0, 16)}...`, "text-green");
+  showToast("Claimed 10,000 USDT test funds (Demo Mode)!", "success");
+  addTerminalLog(`[FAUCET] Ingested 10,000 USDT test tokens into balance.`, "text-green");
 }
 window.handleClaimFaucetQuick = handleClaimFaucetQuick;
 
+// 2. Onchain Deposit & Mint omniRWA
 async function handleDeposit() {
   const input = document.getElementById("deposit-amount");
   const amount = parseFloat(input.value);
@@ -613,32 +706,71 @@ async function handleDeposit() {
 
   const btn = document.getElementById("btn-deposit-action");
   btn.disabled = true;
+
+  if (signer && deployedConfig && deployedConfig.contracts && deployedConfig.contracts.OmniRwaVault) {
+    try {
+      const usdt = new ethers.Contract(deployedConfig.contracts.MockUSDT, ERC20_ABI, signer);
+      const vault = new ethers.Contract(deployedConfig.contracts.OmniRwaVault, VAULT_ABI, signer);
+      const parsedAmount = ethers.parseUnits(amount.toString(), 6);
+
+      // Check current allowance
+      const allowance = await usdt.allowance(userAddress, deployedConfig.contracts.OmniRwaVault);
+      if (allowance < parsedAmount) {
+        btn.innerHTML = `<span class="pulse-dot"></span> Approving USDT in Wallet...`;
+        showToast("Step 1/2: Please approve USDT spending in your wallet...", "info");
+        addTerminalLog(`[APPROVAL] Requesting allowance for ${amount} USDT...`, "text-accent");
+        
+        const appTx = await usdt.approve(deployedConfig.contracts.OmniRwaVault, ethers.MaxUint256);
+        addTerminalLog(`[APPROVAL] Tx submitted: ${appTx.hash}. Waiting for confirmation...`, "text-dim");
+        await appTx.wait();
+        showToast("USDT Approved! Step 2/2: Confirming Deposit in wallet...", "info");
+        addTerminalLog(`[APPROVAL] Approved OmniRwaVault spending.`, "text-green");
+      }
+
+      // Execute onchain deposit
+      btn.innerHTML = `<span class="pulse-dot"></span> Confirming Deposit in Wallet...`;
+      showToast("Confirming deposit transaction in your wallet...", "info");
+      addTerminalLog(`[VAULT] Calling OmniRwaVault.deposit(${amount} USDT)...`, "text-accent");
+
+      const depTx = await vault.deposit(parsedAmount, userAddress);
+      showToast(`Deposit Tx submitted: ${truncateAddress(depTx.hash)}. Waiting for block confirmation...`, "info");
+      addTerminalLog(`[VAULT] Deposit Tx: ${depTx.hash}. Awaiting confirmation...`, "text-dim");
+
+      await depTx.wait();
+      showToast(`Successfully deposited ${amount} USDT & minted ${amount} omniRWA!`, "success");
+      addTerminalLog(`[VAULT] Confirmed! Minted ${amount} omniRWA shares to ${truncateAddress(userAddress)}.`, "text-green");
+
+      input.value = "";
+      input.dispatchEvent(new Event("input"));
+      await fetchOnChainData();
+    } catch (err) {
+      console.error(err);
+      showToast(err.reason || err.message || "Deposit transaction rejected/failed", "error");
+      addTerminalLog(`[VAULT] Deposit failed: ${err.message}`, "text-dim");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `${ICONS.arrowDown} <span>Deposit & Mint omniRWA</span>`;
+    }
+    return;
+  }
+
+  // Fallback demo mode
   btn.innerHTML = `<span class="pulse-dot"></span> Minting omniRWA...`;
-
-  addTerminalLog(`[VAULT] Depositing ${amount} USDT into OmniRWA Vault (ERC-4626)...`, "text-accent");
-
   setTimeout(() => {
     state.userUsdtBalance -= amount;
     state.userSharesBalance += amount;
     state.tvl += amount;
-
-    const statTvl = document.getElementById("stat-tvl");
-    if (statTvl) statTvl.innerHTML = `$${state.tvl.toLocaleString()} <span class="stat-sub">USDT</span>`;
-
-    const landingTvl = document.getElementById("landing-tvl");
-    if (landingTvl) landingTvl.innerHTML = `$${state.tvl.toLocaleString()} <span class="metric-sub">USDT</span>`;
-
     updateBalancesUI();
     input.value = "";
     input.dispatchEvent(new Event("input"));
-
     btn.disabled = false;
     btn.innerHTML = `${ICONS.arrowDown} <span>Deposit & Mint omniRWA</span>`;
-    showToast(`Successfully deposited ${amount} USDT and received ${amount} omniRWA shares!`, "success");
-    addTerminalLog(`[VAULT] Deposit confirmed. Total shares minted: ${amount} omniRWA. Tx: 0x${generateRandomHash()}`, "text-green");
-  }, 1200);
+    showToast(`Deposited ${amount} USDT and received ${amount} omniRWA shares!`, "success");
+    addTerminalLog(`[VAULT] Deposit confirmed. Total shares minted: ${amount} omniRWA.`, "text-green");
+  }, 1000);
 }
 
+// 3. Onchain Withdraw / Redeem
 async function handleWithdraw() {
   const input = document.getElementById("withdraw-amount");
   const amount = parseFloat(input.value);
@@ -655,27 +787,55 @@ async function handleWithdraw() {
 
   const btn = document.getElementById("btn-withdraw-action");
   btn.disabled = true;
-  btn.innerHTML = `<span class="pulse-dot"></span> Redeeming USDT...`;
 
+  if (signer && deployedConfig && deployedConfig.contracts && deployedConfig.contracts.OmniRwaVault) {
+    try {
+      const vault = new ethers.Contract(deployedConfig.contracts.OmniRwaVault, VAULT_ABI, signer);
+      const parsedAmount = ethers.parseUnits(amount.toString(), 6);
+
+      btn.innerHTML = `<span class="pulse-dot"></span> Confirming in Wallet...`;
+      showToast("Please confirm withdrawal in your wallet...", "info");
+      addTerminalLog(`[VAULT] Calling OmniRwaVault.withdraw(${amount} shares)...`, "text-accent");
+
+      const withTx = await vault.withdraw(parsedAmount, userAddress, userAddress);
+      showToast(`Withdrawal Tx submitted: ${truncateAddress(withTx.hash)}. Waiting for block confirmation...`, "info");
+      addTerminalLog(`[VAULT] Withdraw Tx: ${withTx.hash}. Awaiting confirmation...`, "text-dim");
+
+      await withTx.wait();
+      showToast(`Successfully redeemed ${amount} omniRWA shares for USDT!`, "success");
+      addTerminalLog(`[VAULT] Confirmed! ${amount} USDT returned to wallet.`, "text-green");
+
+      input.value = "";
+      input.dispatchEvent(new Event("input"));
+      await fetchOnChainData();
+    } catch (err) {
+      console.error(err);
+      showToast(err.reason || err.message || "Withdrawal transaction rejected/failed", "error");
+      addTerminalLog(`[VAULT] Withdrawal failed: ${err.message}`, "text-dim");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `${ICONS.arrowUp} <span>Withdraw USDT</span>`;
+    }
+    return;
+  }
+
+  // Fallback demo mode
+  btn.innerHTML = `<span class="pulse-dot"></span> Redeeming USDT...`;
   setTimeout(() => {
     state.userSharesBalance -= amount;
     state.userUsdtBalance += amount;
     state.tvl -= amount;
-
-    const statTvl = document.getElementById("stat-tvl");
-    if (statTvl) statTvl.innerHTML = `$${state.tvl.toLocaleString()} <span class="stat-sub">USDT</span>`;
-
     updateBalancesUI();
     input.value = "";
     input.dispatchEvent(new Event("input"));
-
     btn.disabled = false;
     btn.innerHTML = `${ICONS.arrowUp} <span>Withdraw USDT</span>`;
-    showToast(`Successfully redeemed ${amount} omniRWA shares for ${amount} USDT!`, "success");
+    showToast(`Redeemed ${amount} omniRWA shares for ${amount} USDT!`, "success");
     addTerminalLog(`[VAULT] Withdrawal confirmed. ${amount} USDT returned to wallet.`, "text-green");
-  }, 1200);
+  }, 1000);
 }
 
+// 4. Onchain Restaking
 async function handleRestake() {
   const input = document.getElementById("restake-amount");
   const amount = parseFloat(input.value);
@@ -692,15 +852,54 @@ async function handleRestake() {
 
   const btn = document.getElementById("btn-restake-action");
   btn.disabled = true;
-  btn.innerHTML = `<span class="pulse-dot"></span> Restaking on BOT Chain...`;
 
+  if (signer && deployedConfig && deployedConfig.contracts && deployedConfig.contracts.RwaRestakingManager) {
+    try {
+      const vault = new ethers.Contract(deployedConfig.contracts.OmniRwaVault, ERC20_ABI, signer);
+      const restaking = new ethers.Contract(deployedConfig.contracts.RwaRestakingManager, RESTAKING_ABI, signer);
+      const parsedAmount = ethers.parseUnits(amount.toString(), 6);
+
+      // Check allowance for restaking contract to hold omniRWA shares
+      const allowance = await vault.allowance(userAddress, deployedConfig.contracts.RwaRestakingManager);
+      if (allowance < parsedAmount) {
+        btn.innerHTML = `<span class="pulse-dot"></span> Approving omniRWA...`;
+        showToast("Please approve omniRWA share transfer in your wallet...", "info");
+        const appTx = await vault.approve(deployedConfig.contracts.RwaRestakingManager, ethers.MaxUint256);
+        await appTx.wait();
+        showToast("Shares Approved! Confirming restake transaction...", "info");
+      }
+
+      btn.innerHTML = `<span class="pulse-dot"></span> Confirming Restake in Wallet...`;
+      showToast("Please confirm restaking transaction in your wallet...", "info");
+      addTerminalLog(`[RESTAKE] Calling RwaRestakingManager.restake(${amount} shares, Tier ${state.selectedLockTier})...`, "text-accent");
+
+      const resTx = await restaking.restake(parsedAmount, state.selectedLockTier);
+      showToast(`Restake Tx submitted: ${truncateAddress(resTx.hash)}. Waiting for block confirmation...`, "info");
+      addTerminalLog(`[RESTAKE] Tx: ${resTx.hash}. Awaiting confirmation...`, "text-dim");
+
+      await resTx.wait();
+      showToast(`Successfully restaked ${amount} omniRWA on BOT Chain!`, "success");
+      addTerminalLog(`[RESTAKE] Confirmed! Position created with boosted reward multiplier.`, "text-green");
+
+      input.value = "";
+      await fetchOnChainData();
+    } catch (err) {
+      console.error(err);
+      showToast(err.reason || err.message || "Restaking transaction rejected/failed", "error");
+      addTerminalLog(`[RESTAKE] Restake failed: ${err.message}`, "text-dim");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `${ICONS.lightning} <span>Restake Shares</span>`;
+    }
+    return;
+  }
+
+  // Fallback demo mode
   const tierNames = ["Flexible", "30 Days", "90 Days", "180 Days"];
   const multipliers = ["1.0x", "1.25x", "1.50x", "2.00x"];
-
   setTimeout(() => {
     state.userSharesBalance -= amount;
     updateBalancesUI();
-
     state.userPositions.push({
       amount: amount,
       tier: state.selectedLockTier,
@@ -709,15 +908,13 @@ async function handleRestake() {
       date: new Date().toLocaleDateString(),
       points: 0
     });
-
     renderPositions();
     input.value = "";
     btn.disabled = false;
     btn.innerHTML = `${ICONS.lightning} <span>Restake Shares</span>`;
-
-    showToast(`Restaked ${amount} omniRWA in ${tierNames[state.selectedLockTier]} tier (${multipliers[state.selectedLockTier]} boost)!`, "success");
-    addTerminalLog(`[RESTAKE] Position created: ${amount} omniRWA (${tierNames[state.selectedLockTier]} / ${multipliers[state.selectedLockTier]}).`, "text-green");
-  }, 1200);
+    showToast(`Restaked ${amount} omniRWA in ${tierNames[state.selectedLockTier]} tier!`, "success");
+    addTerminalLog(`[RESTAKE] Position created: ${amount} omniRWA (${multipliers[state.selectedLockTier]} boost).`, "text-green");
+  }, 1000);
 }
 
 function renderPositions() {
@@ -760,30 +957,85 @@ function renderPositions() {
   `).join("");
 }
 
-window.claimRewardPos = function(idx) {
+// 5. Onchain Claim Rewards
+window.claimRewardPos = async function(idx) {
+  if (signer && deployedConfig && deployedConfig.contracts && deployedConfig.contracts.RwaRestakingManager) {
+    try {
+      showToast("Please confirm Reward Claim transaction in wallet...", "info");
+      const restaking = new ethers.Contract(deployedConfig.contracts.RwaRestakingManager, RESTAKING_ABI, signer);
+      const tx = await restaking.claimRewards(idx);
+      addTerminalLog(`[REWARDS] Claiming points for position #${idx + 1}... Tx: ${tx.hash}`, "text-accent");
+      await tx.wait();
+      showToast("Claimed BOT Ecosystem Reward Points on-chain!", "success");
+      addTerminalLog(`[REWARDS] Claim confirmed! Points logged on BOT Chain.`, "text-green");
+      await fetchOnChainData();
+      return;
+    } catch (err) {
+      showToast(err.reason || err.message || "Claim transaction failed", "error");
+      return;
+    }
+  }
+
   showToast("Claimed 142 BOT Ecosystem Reward Points!", "success");
   addTerminalLog(`[REWARDS] Claimed restaking points for position #${idx + 1}.`, "text-green");
 };
 
+// 6. Onchain AI Rebalance Execution
 async function handleAiRebalance() {
   const btn = document.getElementById("btn-trigger-ai-rebalance");
   btn.disabled = true;
   btn.innerHTML = `<span class="pulse-dot"></span> Executing On-Chain AI Rebalance...`;
 
   const scenario = AI_SCENARIOS[state.aiScenario];
-  const proofHash = generateRandomHash();
+  const proofHash = ethers.keccak256(ethers.toUtf8Bytes(scenario.rationale + Date.now()));
 
   addTerminalLog(`[AI-AGENT] Generating cryptographic decision proof...`, "text-accent");
-  addTerminalLog(`[AI-AGENT] Proof Hash: 0x${proofHash}`, "text-dim");
-  addTerminalLog(`[AI-CONTROLLER] Dispatching rebalance tx to BOT Chain OmniRwaVault...`, "text-accent");
+  addTerminalLog(`[AI-AGENT] Proof Hash: ${proofHash}`, "text-dim");
 
+  if (signer && deployedConfig && deployedConfig.contracts && deployedConfig.contracts.AiStrategyController) {
+    try {
+      showToast("Please confirm AI Rebalance transaction in your wallet...", "info");
+      addTerminalLog(`[AI-CONTROLLER] Dispatching rebalance tx to BOT Chain OmniRwaVault...`, "text-accent");
+
+      const aiController = new ethers.Contract(deployedConfig.contracts.AiStrategyController, AI_CONTROLLER_ABI, signer);
+      const weightsBps = scenario.weights.map(w => w * 100);
+      const riskScore = scenario.risk;
+      const predictedApyBps = Math.round(scenario.apy * 100);
+
+      const tx = await aiController.executeAiRebalance(
+        "Gemini-3.7-Flash",
+        riskScore,
+        predictedApyBps,
+        weightsBps,
+        scenario.rationale,
+        proofHash
+      );
+
+      showToast(`AI Rebalance Tx submitted: ${truncateAddress(tx.hash)}. Waiting for block confirmation...`, "info");
+      addTerminalLog(`[AI-CONTROLLER] Tx: ${tx.hash}. Awaiting confirmation...`, "text-dim");
+
+      await tx.wait();
+      showToast(`AI Rebalance Executed on BOT Chain! New APY: ${scenario.apy}%`, "success");
+      addTerminalLog(`[SUCCESS] OmniRwaVault rebalanced: [${scenario.weights.join("%, ")}%]. Verifiable on BOTScan!`, "text-green");
+      await fetchOnChainData();
+    } catch (err) {
+      console.error(err);
+      showToast(err.reason || err.message || "AI Rebalance transaction rejected/failed", "error");
+      addTerminalLog(`[AI-CONTROLLER] Rebalance failed: ${err.message}`, "text-dim");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `${ICONS.lightning} <span>Execute Autonomous AI Rebalance on BOT Chain</span>`;
+    }
+    return;
+  }
+
+  // Fallback demo mode
   setTimeout(() => {
     btn.disabled = false;
     btn.innerHTML = `${ICONS.lightning} <span>Execute Autonomous AI Rebalance on BOT Chain</span>`;
-
     showToast(`AI Rebalance Executed! New Target APY: ${scenario.apy}%`, "success");
-    addTerminalLog(`[SUCCESS] OmniRwaVault rebalanced: [${scenario.weights.join("%, ")}%]. Verifiable on BOTScan!`, "text-green");
-  }, 1800);
+    addTerminalLog(`[SUCCESS] OmniRwaVault rebalanced: [${scenario.weights.join("%, ")}%].`, "text-green");
+  }, 1500);
 }
 
 // Log Terminal Simulation Stream
