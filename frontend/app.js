@@ -23,8 +23,8 @@ const BOT_NETWORKS = {
   }
 };
 
-// Target default network
-let currentTargetNetwork = BOT_NETWORKS.MAINNET;
+// Target default network (BOT Chain Testnet)
+let currentTargetNetwork = BOT_NETWORKS.TESTNET;
 
 // Contract ABIs
 const ERC20_ABI = [
@@ -375,6 +375,13 @@ async function checkAndSwitchNetwork() {
   if (!window.ethereum) return;
   try {
     const network = await provider.getNetwork();
+    const netEl = document.getElementById("network-name");
+    if (Number(network.chainId) === BOT_NETWORKS.TESTNET.chainIdDecimal) {
+      if (netEl) netEl.textContent = "BOT Testnet";
+    } else if (Number(network.chainId) === BOT_NETWORKS.MAINNET.chainIdDecimal) {
+      if (netEl) netEl.textContent = "BOT Mainnet";
+    }
+
     if (Number(network.chainId) !== currentTargetNetwork.chainIdDecimal) {
       await switchOrAddNetwork();
     }
@@ -390,14 +397,18 @@ async function switchOrAddNetwork() {
       method: "wallet_switchEthereumChain",
       params: [{ chainId: currentTargetNetwork.chainId }],
     });
+    const netEl = document.getElementById("network-name");
+    if (netEl) netEl.textContent = currentTargetNetwork.chainName.replace("Chain ", "");
     showToast(`Switched to ${currentTargetNetwork.chainName}`, "success");
   } catch (switchError) {
-    if (switchError.code === 4902 || switchError.message?.includes("Unrecognized chain ID")) {
+    if (switchError.code === 4902 || switchError.message?.includes("Unrecognized chain ID") || switchError.message?.includes("4902")) {
       try {
         await window.ethereum.request({
           method: "wallet_addEthereumChain",
           params: [currentTargetNetwork],
         });
+        const netEl = document.getElementById("network-name");
+        if (netEl) netEl.textContent = currentTargetNetwork.chainName.replace("Chain ", "");
         showToast(`Added and switched to ${currentTargetNetwork.chainName}`, "success");
       } catch (addError) {
         showToast(addError.message, "error");
@@ -414,6 +425,17 @@ function setupEventListeners() {
   // Connect Wallet
   const connectBtn = document.getElementById("btn-connect-wallet");
   if (connectBtn) connectBtn.addEventListener("click", connectWallet);
+
+  // Toggle Network between Testnet (968) and Mainnet (677)
+  const toggleNet = document.getElementById("btn-toggle-network");
+  if (toggleNet) {
+    toggleNet.addEventListener("click", async () => {
+      currentTargetNetwork = (currentTargetNetwork.chainIdDecimal === BOT_NETWORKS.TESTNET.chainIdDecimal)
+        ? BOT_NETWORKS.MAINNET
+        : BOT_NETWORKS.TESTNET;
+      await switchOrAddNetwork();
+    });
+  }
 
   // Quick Faucets
   const quickFaucet = document.getElementById("btn-faucet-quick");
