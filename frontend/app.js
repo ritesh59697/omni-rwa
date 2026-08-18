@@ -738,15 +738,15 @@ async function handleDeposit() {
       // Check current allowance
       const allowance = await usdt.allowance(userAddress, deployedConfig.contracts.OmniRwaVault);
       if (allowance < parsedAmount) {
-        btn.innerHTML = `<span class="pulse-dot"></span> Approving USDT in Wallet...`;
-        showToast("Step 1/2: Please approve USDT spending in your wallet...", "info");
-        addTerminalLog(`[APPROVAL] Requesting allowance for ${amount} USDT...`, "text-accent");
+        btn.innerHTML = `<span class="pulse-dot"></span> Approving ${amount.toLocaleString()} USDT in Wallet...`;
+        showToast(`Step 1/2: Please approve ${amount.toLocaleString()} USDT in your wallet...`, "info");
+        addTerminalLog(`[APPROVAL] Requesting exact allowance for ${amount.toLocaleString()} USDT...`, "text-accent");
         
-        const appTx = await usdt.approve(deployedConfig.contracts.OmniRwaVault, ethers.MaxUint256);
+        const appTx = await usdt.approve(deployedConfig.contracts.OmniRwaVault, parsedAmount);
         addTerminalLog(`[APPROVAL] Tx submitted: ${appTx.hash}. Waiting for confirmation...`, "text-dim");
         await appTx.wait();
         showToast("USDT Approved! Step 2/2: Confirming Deposit in wallet...", "info");
-        addTerminalLog(`[APPROVAL] Approved OmniRwaVault spending.`, "text-green");
+        addTerminalLog(`[APPROVAL] Approved OmniRwaVault spending of ${amount.toLocaleString()} USDT.`, "text-green");
       }
 
       // Execute onchain deposit
@@ -884,9 +884,9 @@ async function handleRestake() {
       // Check allowance for restaking contract to hold omniRWA shares
       const allowance = await vault.allowance(userAddress, deployedConfig.contracts.RwaRestakingManager);
       if (allowance < parsedAmount) {
-        btn.innerHTML = `<span class="pulse-dot"></span> Approving omniRWA...`;
-        showToast("Please approve omniRWA share transfer in your wallet...", "info");
-        const appTx = await vault.approve(deployedConfig.contracts.RwaRestakingManager, ethers.MaxUint256);
+        btn.innerHTML = `<span class="pulse-dot"></span> Approving ${amount.toLocaleString()} omniRWA...`;
+        showToast(`Please approve ${amount.toLocaleString()} omniRWA in your wallet...`, "info");
+        const appTx = await vault.approve(deployedConfig.contracts.RwaRestakingManager, parsedAmount);
         await appTx.wait();
         showToast("Shares Approved! Confirming restake transaction...", "info");
       }
