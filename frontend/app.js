@@ -426,6 +426,12 @@ function setupEventListeners() {
   const connectBtn = document.getElementById("btn-connect-wallet");
   if (connectBtn) connectBtn.addEventListener("click", connectWallet);
 
+  // Theme Toggle (Light / Dark)
+  const themeBtn = document.getElementById("btn-theme-toggle");
+  if (themeBtn) {
+    themeBtn.addEventListener("click", toggleTheme);
+  }
+
   // Toggle Network between Testnet (968) and Mainnet (677)
   const toggleNet = document.getElementById("btn-toggle-network");
   if (toggleNet) {
@@ -1119,8 +1125,39 @@ function showToast(msg, type = "info") {
   }, 4000);
 }
 
+// Theme Management
+function initTheme() {
+  const saved = localStorage.getItem("omni_theme") || "dark";
+  applyTheme(saved);
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+  const target = current === "light" ? "dark" : "light";
+  applyTheme(target);
+  localStorage.setItem("omni_theme", target);
+  showToast(`Switched to ${target === "light" ? "Light" : "Dark"} theme`, "info");
+}
+
+function applyTheme(theme) {
+  if (theme === "light") {
+    document.documentElement.setAttribute("data-theme", "light");
+    const sun = document.getElementById("theme-icon-sun");
+    const moon = document.getElementById("theme-icon-moon");
+    if (sun) sun.style.display = "block";
+    if (moon) moon.style.display = "none";
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+    const sun = document.getElementById("theme-icon-sun");
+    const moon = document.getElementById("theme-icon-moon");
+    if (sun) sun.style.display = "none";
+    if (moon) moon.style.display = "block";
+  }
+}
+
 // Init
 document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
   setupNavigation();
   setupYieldCalculator();
   setupFaqAccordion();

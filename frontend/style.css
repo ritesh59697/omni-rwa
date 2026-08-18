@@ -60,6 +60,63 @@
   --t-base: 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Light Mode Theme Tokens (Stripe / Swiss Institutional Style) */
+[data-theme="light"] {
+  --bg-app: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-surface-subtle: #F1F5F9;
+  --bg-surface-elevated: #E2E8F0;
+  --bg-input: #FFFFFF;
+
+  --border-subtle: #E2E8F0;
+  --border-default: #CBD5E1;
+  --border-focus: #2563EB;
+  --border-accent: #059669;
+
+  --accent: #059669;
+  --accent-hover: #047857;
+  --accent-muted: rgba(5, 150, 105, 0.12);
+  --accent-text: #059669;
+
+  --blue: #2563EB;
+  --blue-muted: rgba(37, 99, 235, 0.1);
+
+  --purple: #7C3AED;
+  --purple-muted: rgba(124, 58, 237, 0.1);
+
+  --green: #059669;
+  --green-muted: rgba(5, 150, 105, 0.1);
+
+  --red: #DC2626;
+  --yellow: #D97706;
+
+  --text-pure: #0F172A;
+  --text-primary: #1E293B;
+  --text-secondary: #475569;
+  --text-tertiary: #64748B;
+  --text-disabled: #94A3B8;
+}
+
+[data-theme="light"] .terminal-block {
+  background: #0F172A;
+}
+
+[data-theme="light"] .btn-primary {
+  color: #FFFFFF;
+}
+
+[data-theme="light"] .btn-wallet {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.25);
+  color: #1D4ED8;
+}
+
+[data-theme="light"] .btn-faucet {
+  background: rgba(5, 150, 105, 0.08);
+  border-color: rgba(5, 150, 105, 0.25);
+  color: #047857;
+}
+
 /* Reset & Scaffolding */
 * {
   margin: 0;
