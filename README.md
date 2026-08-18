@@ -2,6 +2,12 @@
 
 > **Institutional-grade Real-World Asset (RWA) Yield Aggregator & Restaking Engine powered by Autonomous AI Agents on BOT Chain.**
 
+[![Live Demo](https://img.shields.io/badge/Live_dApp-omni--rwa.vercel.app-00D492?style=for-the-badge&logo=vercel)](https://omni-rwa.vercel.app/)
+[![Network: BOT Chain Testnet 968](https://img.shields.io/badge/Network-BOT_Chain_Testnet_968-3B82F6?style=for-the-badge)](https://scan.bohr.life)
+[![Contracts](https://img.shields.io/badge/Solidity-0.8.24-orange?style=for-the-badge&logo=solidity)](contracts/)
+
+🔗 **Live Production URL**: [https://omni-rwa.vercel.app/](https://omni-rwa.vercel.app/)
+
 ---
 
 ## 📌 Overview
