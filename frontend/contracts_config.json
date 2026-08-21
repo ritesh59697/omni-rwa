@@ -1,14 +1,14 @@
 {
-  "network": "botTestnet",
-  "chainId": 968,
-  "deployedAt": "2026-08-17T02:09:26.413Z",
+  "network": "botMainnet",
+  "chainId": 677,
+  "deployedAt": "2026-08-20T16:44:46.022Z",
   "contracts": {
-    "MockUSDT": "0x9CFbee56C9Ae7DacD1c6ac040eCcE04c803E12D8",
-    "bUSTB": "0xdc162849bD2c2B0dfF9e47ABf3Cd00734117EFCA",
-    "bREIT": "0xeF919280728e2f78fe04F5813134616Fa276Dd12",
-    "bGREEN": "0x198e48AfAF7b7eb1e6CcFbb14458A83FFc618967",
-    "OmniRwaVault": "0x3DAcbF0F199e804EB6572C62a5fBFCA6C92992A5",
-    "AiStrategyController": "0xcB51723766223872427F49A1ec0aD4d57b667821",
-    "RwaRestakingManager": "0xAD33aA3F0464b647e91bc026e2A4Daa0C40048d1"
+    "MockUSDT": "0x792CADF05b4A16F35bf24b6170162776A02FBBcF",
+    "bUSTB": "0x717958e45fe7Fb6cb9c221D1F26F279c63838B62",
+    "bREIT": "0x162BCE9e137Ec5Fafcf57280dC840c61365076ea",
+    "bGREEN": "0xEba6106C100b8Ff61e3190EaB4c7fabb71987f91",
+    "OmniRwaVault": "0x7d21ed4F7767d9e58De29D8d80BD0246e180113a",
+    "AiStrategyController": "0x846ad8b62b3626966Cd6D7C716e0bBE95C71766d",
+    "RwaRestakingManager": "0x88b9e4074186A4849569EfEA805B40Be0fbEe737"
   }
 }

@@ -13,6 +13,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
 </head>
 <body>
+  <!-- Arctic Frost Aura Gradient Backdrops -->
+  <div class="aura-layer-1" aria-hidden="true"></div>
+  <div class="aura-layer-2" aria-hidden="true"></div>
+
   <!-- Navigation Bar -->
   <nav class="navbar">
     <div class="nav-container">
@@ -23,7 +27,7 @@
           </svg>
         </div>
         <span class="brand-title">OmniRWA</span>
-        <span class="brand-badge">BOT Testnet (968)</span>
+        <span class="brand-badge">BOT Mainnet (677)</span>
       </div>
 
       <div class="nav-links">
@@ -47,7 +51,7 @@
       <div class="nav-actions">
         <div class="network-tag" id="btn-toggle-network" title="Click to switch network" style="cursor:pointer;">
           <span class="live-indicator"></span>
-          <span id="network-name">BOT Testnet</span>
+          <span id="network-name">BOT Mainnet</span>
         </div>
         <button class="btn btn-secondary btn-sm" id="btn-theme-toggle" title="Toggle Light/Dark Theme" style="padding: 0.35rem 0.55rem;">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="theme-icon-sun" style="display:none;"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
@@ -76,21 +80,21 @@
       <div class="hero-asymmetric-grid">
         <!-- Left: Statement & Direct Actions -->
         <div class="hero-statement">
-          <div class="pill-status">
+          <div class="pill-status animate-fade-in">
             <span class="live-indicator"></span>
             BOT Chain Builder Challenge #2 • AI × RWA Track
           </div>
 
-          <h1 class="hero-h1">
+          <h1 class="hero-h1 animate-fade-in delay-100">
             Institutional Real-World Assets.<br>
             <strong>Autonomous AI Yield Engine.</strong>
           </h1>
 
-          <p class="hero-p">
+          <p class="hero-p animate-fade-in delay-200">
             OmniRWA aggregates tokenized sovereign debt, commercial real estate loans, and green infrastructure into an ERC-4626 vault dynamically rebalanced by on-chain AI agents on BOT Chain.
           </p>
 
-          <div class="hero-actions-row">
+          <div class="hero-actions-row animate-fade-in delay-300">
             <button class="btn btn-primary btn-lg" onclick="switchAppTab('tab-vault')">
               Launch OmniVault App
             </button>
@@ -102,7 +106,7 @@
             </a>
           </div>
 
-          <div class="quick-stats-row">
+          <div class="quick-stats-row animate-fade-in delay-300">
             <div class="quick-stat-item">
               <div class="stat-label">Total Value Locked</div>
               <div class="stat-num" id="landing-tvl">$1,485,200 <span style="font-size:0.8rem;color:var(--text-tertiary);">USDT</span></div>
@@ -122,7 +126,7 @@
         </div>
 
         <!-- Right: Real-Time Live Market Matrix -->
-        <div class="market-matrix-card">
+        <div class="market-matrix-card animate-fade-in delay-200">
           <div class="matrix-header">
             <div class="matrix-title">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
@@ -911,8 +915,9 @@
   <!-- Footer -->
   <footer class="footer">
     <div class="footer-inner">
-      <div>© 2026 OmniRWA Protocol • Deployed on BOT Chain (Chain ID 677 / 968)</div>
+      <div>© 2026 OmniRWA Protocol • Deployed on BOT Chain (Chain ID 677)</div>
       <div class="footer-links-row">
+        <a href="https://github.com/ritesh59697/omni-rwa" target="_blank">GitHub Code</a>
         <a href="https://scan.botchain.ai" target="_blank">BOTScan</a>
         <a href="https://faucet.botchain.ai/basic" target="_blank">Faucet</a>
         <a href="https://dev-docs.botchain.ai" target="_blank">Dev Docs</a>

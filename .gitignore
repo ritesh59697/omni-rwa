@@ -41,4 +41,11 @@ tmp/
 temp/
 *.log
 memory.md
+.env
+
+# Agentic & IDE configurations
+.codex/
+.cursor/
+.grok/
+.impeccable/
 

@@ -24,7 +24,7 @@ const BOT_NETWORKS = {
 };
 
 // Target default network (BOT Chain Testnet)
-let currentTargetNetwork = BOT_NETWORKS.TESTNET;
+let currentTargetNetwork = BOT_NETWORKS.MAINNET;
 
 // Contract ABIs
 const ERC20_ABI = [
@@ -192,6 +192,17 @@ function setupYieldCalculator() {
   let currentMonths = 12;
 
   function updateCalculations() {
+    const animEls = [
+      document.getElementById("calc-omni-total"),
+      document.getElementById("calc-omni-profit"),
+      document.getElementById("calc-omni-points"),
+      document.getElementById("calc-tradfi-total"),
+      document.getElementById("calc-defi-total")
+    ];
+    animEls.forEach(el => {
+      if (el) el.classList.add("calc-animating");
+    });
+
     const principal = parseFloat(slider.value) || 10000;
     principalText.textContent = `$${principal.toLocaleString()}`;
 
@@ -246,6 +257,12 @@ function setupYieldCalculator() {
 
     const outperformEl = document.getElementById("calc-outperform-multiplier");
     if (outperformEl) outperformEl.textContent = `${outperformRatio}x`;
+
+    setTimeout(() => {
+      animEls.forEach(el => {
+        if (el) el.classList.remove("calc-animating");
+      });
+    }, 120);
   }
 
   slider.addEventListener("input", updateCalculations);
@@ -317,11 +334,20 @@ function truncateAddress(addr) {
 
 // Web3 Connection
 async function initEthers() {
+  // Set fallback read-only JSON-RPC provider so live TVL/APY load even if wallet is disconnected
+  try {
+    provider = new ethers.JsonRpcProvider(currentTargetNetwork.rpcUrls[0]);
+    await fetchOnChainData();
+  } catch (err) {
+    console.log("Failed to initialize read-only provider:", err);
+  }
+
   if (window.ethereum) {
-    provider = new ethers.BrowserProvider(window.ethereum);
+    const web3Provider = new ethers.BrowserProvider(window.ethereum);
     try {
-      const accounts = await provider.listAccounts();
+      const accounts = await web3Provider.listAccounts();
       if (accounts.length > 0) {
+        provider = web3Provider;
         signer = await provider.getSigner();
         userAddress = accounts[0].address;
         onWalletConnected();
@@ -333,6 +359,7 @@ async function initEthers() {
 }
 
 async function connectWallet() {
+  if (userAddress) return; // Already connected, do nothing
   if (!window.ethereum) {
     showToast("MetaMask or EVM wallet not detected. Please install a Web3 wallet.", "error");
     return;
@@ -355,6 +382,8 @@ async function connectWallet() {
 async function onWalletConnected() {
   const btn = document.getElementById("wallet-btn-text");
   if (btn) btn.textContent = truncateAddress(userAddress);
+  const parentBtn = document.getElementById("btn-connect-wallet");
+  if (parentBtn) parentBtn.classList.add("connected");
   updateBalancesUI();
   addTerminalLog(`[WALLET] Connected user address: ${userAddress}`, "text-green");
   await fetchOnChainData();
@@ -1089,6 +1118,11 @@ function addTerminalLog(msg, cssClass = "") {
   const container = document.getElementById("ai-terminal-logs");
   if (!container) return;
 
+  // Prune old logs to keep terminal display bounded and clean (similar to real production consoles)
+  while (container.children.length >= 25) {
+    container.removeChild(container.firstChild);
+  }
+
   const line = document.createElement("div");
   line.className = `log-line ${cssClass}`;
   line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
@@ -1110,6 +1144,14 @@ function showToast(msg, type = "info") {
   const container = document.getElementById("toast-container");
   if (!container) return;
 
+  // Prevent duplicate toasts from stacking
+  const activeToasts = container.querySelectorAll(".toast");
+  for (let t of activeToasts) {
+    if (t.innerText.includes(msg)) {
+      return;
+    }
+  }
+
   const toast = document.createElement("div");
   toast.className = `toast ${type}`;
   toast.innerHTML = `
@@ -1127,8 +1169,7 @@ function showToast(msg, type = "info") {
 
 // Theme Management
 function initTheme() {
-  const saved = localStorage.getItem("omni_theme") || "dark";
-  applyTheme(saved);
+  applyTheme("light");
 }
 
 function toggleTheme() {
@@ -1163,7 +1204,25 @@ document.addEventListener("DOMContentLoaded", () => {
   setupFaqAccordion();
   setupEventListeners();
   updateBalancesUI();
-  loadContractsConfig();
-  initEthers();
+  loadContractsConfig().then(() => {
+    initEthers();
+  });
   startLogSimulation();
+  setupCursorGlow();
 });
+
+function setupCursorGlow() {
+  const glow = document.createElement("div");
+  glow.className = "cursor-glow";
+  document.body.appendChild(glow);
+
+  window.addEventListener("pointermove", (e) => {
+    glow.style.left = `${e.clientX}px`;
+    glow.style.top = `${e.clientY}px`;
+    glow.style.opacity = "1";
+  });
+
+  window.addEventListener("pointerleave", () => {
+    glow.style.opacity = "0";
+  });
+}
