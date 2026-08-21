@@ -1840,14 +1840,14 @@ h1, h2, h3, h4, .font-display {
 
 .btn-outline {
   background: transparent;
-  border-color: var(--border-default);
-  color: var(--text-secondary);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .btn-outline:hover {
-  background: var(--bg-surface-subtle);
-  border-color: var(--border-focus);
-  color: var(--accent-text);
+  background: rgba(37, 99, 235, 0.08);
+  border-color: var(--accent-hover);
+  color: var(--accent-hover);
 }
 
 .scenario-card-btn {
