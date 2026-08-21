@@ -2,7 +2,8 @@
 
 > **Institutional-grade Real-World Asset (RWA) Yield Aggregator & Restaking Engine powered by Autonomous AI Agents on BOT Chain.**
 
-🔗 **Live Production URL**: [https://omni-rwa.vercel.app/](https://omni-rwa.vercel.app/)
+🔗 **Live Production URL**: [https://omni-rwa.vercel.app/](https://omni-rwa.vercel.app/)  
+🎬 **Demo Walkthrough Video**: [Watch on YouTube](https://youtu.be/nrtwBojAqLA)
 
 ---
 
