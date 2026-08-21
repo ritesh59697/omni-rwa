@@ -1691,11 +1691,38 @@ h1, h2, h3, h4, .font-display {
 }
 
 @media (max-width: 768px) {
-  .hero-h1 {
-    font-size: 2rem;
+  .navbar {
+    padding: 0.5rem 1rem;
+  }
+  .nav-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .brand {
+    justify-content: space-between;
+    width: 100%;
   }
   .nav-links {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    width: 100%;
+    padding: 0.25rem;
+    gap: 0.15rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .nav-links::-webkit-scrollbar {
     display: none;
+  }
+  .nav-actions {
+    justify-content: space-between;
+    width: 100%;
+    gap: 0.5rem;
+  }
+  .hero-h1 {
+    font-size: 2rem;
   }
   .architecture-row, .guardrails-row, .quick-stats-row, .stats-4-grid, .restake-tiers-grid {
     grid-template-columns: 1fr;
