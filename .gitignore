@@ -55,6 +55,8 @@ memory.md
 *.webm
 *.avi
 *.mkv
+*.srt
 *public/
+
 
 
