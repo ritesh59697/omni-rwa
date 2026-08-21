@@ -359,7 +359,10 @@ async function initEthers() {
 }
 
 async function connectWallet() {
-  if (userAddress) return; // Already connected, do nothing
+  if (userAddress) {
+    disconnectWallet();
+    return;
+  }
   if (!window.ethereum) {
     showToast("MetaMask or EVM wallet not detected. Please install a Web3 wallet.", "error");
     return;
@@ -377,6 +380,35 @@ async function connectWallet() {
     console.error(err);
     showToast(err.message || "Failed to connect wallet", "error");
   }
+}
+
+function disconnectWallet() {
+  userAddress = null;
+  signer = null;
+  
+  // Re-instantiate read-only fallback provider so stats keep updating
+  try {
+    provider = new ethers.JsonRpcProvider(currentTargetNetwork.rpcUrl);
+  } catch (err) {
+    console.error("Fallback provider initialization error:", err);
+  }
+
+  const btnText = document.getElementById("wallet-btn-text");
+  if (btnText) btnText.textContent = "Connect Wallet";
+  
+  const parentBtn = document.getElementById("btn-connect-wallet");
+  if (parentBtn) parentBtn.classList.remove("connected");
+
+  state.userUsdtBalance = 0;
+  state.userSharesBalance = 0;
+  state.userRestakedShares = 0;
+  state.userRewardsAccrued = 0;
+  updateBalancesUI();
+
+  addTerminalLog(`[WALLET] Disconnected user wallet`, "text-dim");
+  showToast("Wallet disconnected", "info");
+  
+  fetchOnChainData();
 }
 
 async function onWalletConnected() {
@@ -453,7 +485,23 @@ async function switchOrAddNetwork() {
 function setupEventListeners() {
   // Connect Wallet
   const connectBtn = document.getElementById("btn-connect-wallet");
-  if (connectBtn) connectBtn.addEventListener("click", connectWallet);
+  if (connectBtn) {
+    connectBtn.addEventListener("click", connectWallet);
+    
+    connectBtn.addEventListener("mouseenter", () => {
+      if (userAddress) {
+        const btnText = document.getElementById("wallet-btn-text");
+        if (btnText) btnText.textContent = "Disconnect";
+      }
+    });
+    
+    connectBtn.addEventListener("mouseleave", () => {
+      if (userAddress) {
+        const btnText = document.getElementById("wallet-btn-text");
+        if (btnText) btnText.textContent = truncateAddress(userAddress);
+      }
+    });
+  }
 
   // Theme Toggle (Light / Dark)
   const themeBtn = document.getElementById("btn-theme-toggle");
