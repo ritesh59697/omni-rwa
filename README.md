@@ -108,5 +108,24 @@ python3 -m http.server 8080
 
 ---
 
+## 🌟 Ecosystem Integration & Growth Roadmap
+
+### 1. Why BOT Chain?
+OmniRWA was built natively for BOT Chain to leverage its unique positioning as a high-performance EVM network tailored for the **AI Agent Economy**. The low gas overhead and rapid transaction finality allow our automated AI agents to execute rebalancing transactions frequently without eroding user yields.
+
+### 2. New AI & RWA Capabilities
+OmniRWA unites the two primary tracks of the challenge into a single composable product:
+*   **Onchain AI Autonomy**: Authorized AI models execute rebalances directly via cryptographically signed proofs submitted to the `AiStrategyController`.
+*   **Boosted Restaking Yields**: Users can restake their vault shares (`omniRWA`) in `RwaRestakingManager` to lock liquidity and earn amplified yield boosts and BOT ecosystem points.
+
+### 3. User Growth & Sustained Activity
+We plan to drive long-term user acquisition and sustained on-chain volume through:
+*   **Ecosystem Partnerships**: Integrating with BOT DEXs to set up high-yield liquidity pools for restaked vault shares.
+*   **Dynamic AI Rebalancing Events**: AI-driven rebalancing events occur periodically on-chain based on macro yield indicators, generating continuous transaction volume on BOT Chain.
+*   **Ecosystem Point Incentives**: Encouraging long-term staking by distributing point rewards that map to BOT Chain network milestones.
+
+---
+
 ## 📄 License
 MIT License. Built for the BOT Chain Builder Challenge #2.
+
