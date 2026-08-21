@@ -49,3 +49,12 @@ memory.md
 .grok/
 .impeccable/
 
+# Media & Demo Video Exclusions (Do not push to Git)
+*.mp4
+*.mov
+*.webm
+*.avi
+*.mkv
+*public/
+
+
